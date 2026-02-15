@@ -46,3 +46,17 @@ def generar_predicciones():
 if __name__ == "__main__":
 
     generar_predicciones()
+
+import streamlit as st
+
+# Esto solo se activa si lo abrís desde la web
+if __name__ == "__main__":
+    st.title("⭐ TOP 5 PARA MAÑANA")
+    try:
+        # Tu script genera un TOP 10, lo leemos y lo mostramos
+        df_mostrar = pd.read_excel(ruta_salida)
+        st.table(df_mostrar.head(5))
+        st.success("Predicciones cargadas con éxito.")
+    except Exception as e:
+        st.error(f"Aún no hay predicciones generadas. Error: {e}")
+
