@@ -106,6 +106,9 @@ def extraer_todo_el_mercado():
 
     if todas_las_datas:
         df_final = pd.concat(todas_las_datas)
+        # Quitamos la zona horaria para que Excel no tire error
+        df_final['Date'] = df_final['Date'].dt.tz_localize(None)
+
         df_final.to_excel(ruta_excel, index=False)
         print(f"\n🔥 EXTRACCIÓN MASIVA COMPLETADA 🔥")
     else:
@@ -113,3 +116,4 @@ def extraer_todo_el_mercado():
 
 if __name__ == "__main__":
     extraer_todo_el_mercado()
+
