@@ -106,8 +106,10 @@ def extraer_todo_el_mercado():
 
     if todas_las_datas:
         df_final = pd.concat(todas_las_datas)
-        # Quitamos la zona horaria para que Excel no tire error
-        df_final['Date'] = df_final['Date'].dt.tz_localize(None)
+        
+        # EL CAMBIO ESTÁ AQUÍ: Forzamos la fecha a texto para que Excel no se rompa
+        if 'Date' in df_final.columns:
+            df_final['Date'] = df_final['Date'].dt.strftime('%Y-%m-%d')
 
         df_final.to_excel(ruta_excel, index=False)
         print(f"\n🔥 EXTRACCIÓN MASIVA COMPLETADA 🔥")
@@ -116,4 +118,3 @@ def extraer_todo_el_mercado():
 
 if __name__ == "__main__":
     extraer_todo_el_mercado()
-
