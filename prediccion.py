@@ -3,9 +3,9 @@ import pickle
 import os
 
 # CONFIGURACIÓN
-ruta_excel = r'C:\Users\PC\OneDrive\Escritorio\MAIN\IA_INVERSION_SEMANAL\HISTORIAL_DIARIO_COMPLETO.xlsx'
-ruta_modelo = r'C:\Users\PC\OneDrive\Escritorio\MAIN\IA_INVERSION_SEMANAL\modelo_ia.pkl'
-ruta_salida = r'C:\Users\PC\OneDrive\Escritorio\MAIN\IA_INVERSION_SEMANAL\PREDICCIONES_DE_HOY.xlsx'
+ruta_excel = 'HISTORIAL_DIARIO_COMPLETO.xlsx'
+ruta_modelo = 'modelo_ia.pkl'
+ruta_salida = 'TOP_10_PREDICCIONES.xlsx'
 
 def generar_predicciones():
     print("🔮 Generando predicciones para mañana...")
@@ -44,4 +44,5 @@ def generar_predicciones():
     print(top_5[['Ticker', 'Close', 'Confianza_%', 'Stop_Loss']].head(5))
 
 if __name__ == "__main__":
+
     generar_predicciones()
