@@ -62,16 +62,24 @@ def extraer_todo_el_mercado():
 
     for ticker in tickers_ba:
         try:
-            # Bajamos el historial (2 años para tener MA200 sólida)
-            data = yf.download(ticker, period="2y", interval="1d", progress=False)
+            # 1. Creamos el objeto ticker para obtener info extra
+            t_obj = yf.Ticker(ticker)
+            
+            # 2. Bajamos el historial
+            data = t_obj.history(period="2y", interval="1d")
             
             if data.empty or len(data) < 200:
                 continue
 
-            # Limpiar columnas por si vienen con formato raro
+            # Limpiar columnas
             data.columns = [col[0] if isinstance(col, tuple) else col for col in data.columns]
             
-            # --- CÁLCULO DE INDICADORES (Librería Técnica Profesional) ---
+            # 3. Obtenemos Nombre y Sector
+            # Si Yahoo no lo tiene, ponemos 'N/A'
+            nombre = t_obj.info.get('longName', 'N/A')
+            sector = t_obj.info.get('sector', 'N/A')
+            
+            # --- CÁLCULO DE INDICADORES ---
             data['RSI'] = ta.rsi(data['Close'], length=14)
             data['MA50'] = ta.sma(data['Close'], length=50)
             data['MA200'] = ta.sma(data['Close'], length=200)
@@ -80,16 +88,17 @@ def extraer_todo_el_mercado():
             # --- LIMPIEZA Y FORMATO ---
             ticker_nom = ticker.replace(".BA", "")
             data['Ticker'] = ticker_nom
+            data['Nombre'] = nombre
+            data['Sector'] = sector
             data['Date'] = data.index
             
-            # Seleccionamos las columnas necesarias
-            df_ticker = data[['Ticker', 'Date', 'Close', 'High', 'Low', 'Open', 'Volume', 'RSI', 'MA50', 'MA200', 'ATR']]
+            # Seleccionamos las columnas (Agregamos Nombre y Sector)
+            df_ticker = data[['Ticker', 'Nombre', 'Sector', 'Date', 'Close', 'High', 'Low', 'Open', 'Volume', 'RSI', 'MA50', 'MA200', 'ATR']]
             
-            # Filtro de coherencia: Si el precio es 0 o nan, afuera
             if pd.isna(df_ticker['Close'].iloc[-1]):
                 continue
 
-            todas_las_datas.append(df_ticker.tail(300)) # Guardamos los últimos 300 días
+            todas_las_datas.append(df_ticker.tail(300))
             print(f"✅ {ticker_nom} procesado.")
 
         except Exception as e:
@@ -99,11 +108,8 @@ def extraer_todo_el_mercado():
         df_final = pd.concat(todas_las_datas)
         df_final.to_excel(ruta_excel, index=False)
         print(f"\n🔥 EXTRACCIÓN MASIVA COMPLETADA 🔥")
-        print(f"Total de activos procesados: {len(tickers_base)}")
-        print(f"Archivo guardado en: {ruta_excel}")
     else:
-        print("🔴 No se pudo extraer nada. Revisá la conexión.")
+        print("🔴 No se pudo extraer nada.")
 
 if __name__ == "__main__":
-
     extraer_todo_el_mercado()
