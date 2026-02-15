@@ -66,7 +66,8 @@ if __name__ == "__main__":
             generar_predicciones()
             
             status.update(label="✅ ¡Proceso Completado!", state="complete", expanded=False)
-
+            st.rerun()  # <--- AGREGÁ ESTA LÍNEA AQUÍ
+    
     # Mostrar la tabla si el archivo existe
     if os.path.exists(ruta_salida):
         df_mostrar = pd.read_excel(ruta_salida)
@@ -74,5 +75,6 @@ if __name__ == "__main__":
         st.table(df_mostrar[['Ticker', 'Close', 'Confianza_%', 'Stop_Loss']].head(5))
     else:
         st.info("Hacé clic en el botón de arriba para iniciar el análisis por primera vez.")
+
 
 
