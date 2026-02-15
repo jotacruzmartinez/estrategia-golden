@@ -4,8 +4,8 @@ import pickle
 import os
 
 # CONFIGURACIÓN
-ruta_excel = r'C:\Users\PC\OneDrive\Escritorio\MAIN\IA_INVERSION_SEMANAL\HISTORIAL_DIARIO_COMPLETO.xlsx'
-ruta_modelo = r'C:\Users\PC\OneDrive\Escritorio\MAIN\IA_INVERSION_SEMANAL\modelo_ia.pkl'
+ruta_excel = 'HISTORIAL_DIARIO_COMPLETO.xlsx'
+ruta_modelo = 'modelo_ia.pkl'
 
 def entrenar_modelo():
     print("🧠 Entrenando la IA con el nuevo mapa de mercado...")
@@ -41,4 +41,5 @@ def entrenar_modelo():
     print(f"✅ IA Re-entrenada con éxito.")
 
 if __name__ == "__main__":
+
     entrenar_modelo()
