@@ -48,15 +48,31 @@ if __name__ == "__main__":
     generar_predicciones()
 
 import streamlit as st
+import subprocess
 
-# Esto solo se activa si lo abrís desde la web
 if __name__ == "__main__":
     st.title("⭐ TOP 5 PARA MAÑANA")
-    try:
-        # Tu script genera un TOP 10, lo leemos y lo mostramos
+    
+    # Botón para ejecutar todo el proceso
+    if st.button("🔄 ACTUALIZAR MERCADO Y GENERAR PREDICCIONES"):
+        with st.status("Ejecutando proceso completo...", expanded=True) as status:
+            st.write("1. Extrayendo datos de 402 activos (pesos.py)...")
+            subprocess.run(["python", "pesos.py"])
+            
+            st.write("2. Entrenando la IA (IA.py)...")
+            subprocess.run(["python", "IA.py"])
+            
+            st.write("3. Generando predicciones finales...")
+            generar_predicciones()
+            
+            status.update(label="✅ ¡Proceso Completado!", state="complete", expanded=False)
+
+    # Mostrar la tabla si el archivo existe
+    if os.path.exists(ruta_salida):
         df_mostrar = pd.read_excel(ruta_salida)
-        st.table(df_mostrar.head(5))
-        st.success("Predicciones cargadas con éxito.")
-    except Exception as e:
-        st.error(f"Aún no hay predicciones generadas. Error: {e}")
+        st.subheader("Resultados del análisis:")
+        st.table(df_mostrar[['Ticker', 'Close', 'Confianza_%', 'Stop_Loss']].head(5))
+    else:
+        st.info("Hacé clic en el botón de arriba para iniciar el análisis por primera vez.")
+
 
