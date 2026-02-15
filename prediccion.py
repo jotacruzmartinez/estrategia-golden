@@ -19,7 +19,7 @@ def generar_predicciones():
     with open(ruta_modelo, 'rb') as f:
         modelo = pickle.load(f)
 
-    # Lógica de indicadores (Tu lógica original)
+    # Lógica de indicadores (Tu lógica original intacta)
     df['Distancia_MA50'] = df['Close'] / df['MA50']
     df['Distancia_MA200'] = df['Close'] / df['MA200']
     df['Volatilidad_Relativa'] = df['ATR'] / df['Close']
@@ -36,28 +36,37 @@ def generar_predicciones():
     ultima_data['RSI'] = ultima_data['RSI'].round(2)
     ultima_data['ATR'] = ultima_data['ATR'].round(2)
     
-    # Stop Loss y Take Profit
+    # 1. Stop Loss (Tu fórmula original)
     ultima_data['STOP LOSS'] = (ultima_data['Close'] - (ultima_data['ATR'] * 2)).round(2)
-    riesgo = ultima_data['Close'] - ultima_data['STOP LOSS']
-    ultima_data['TAKE PROFIT'] = (ultima_data['Close'] + (riesgo * 1.5)).round(2)
     
-    # Ratio R/B (Beneficio 1.5 / Riesgo 1.0 = 1.5 en tu fórmula actual)
-    ultima_data['Ratio R/B'] = 1.5 
+    # 2. Definimos el Riesgo en pesos para calcular el Ratio
+    riesgo_pesos = ultima_data['Precio'] - ultima_data['STOP LOSS']
+    
+    # 3. Take Profits Dinámicos (Para evitar lo que te pasó con Atlassian)
+    # TP Conservador: A solo 1.5 veces el ATR (Para asegurar ganancia rápido)
+    ultima_data['TP_CONSERVADOR'] = (ultima_data['Close'] + (ultima_data['ATR'] * 1.5)).round(2)
+    
+    # TP Optimista: A 3 veces el ATR (Para capturar subidas fuertes)
+    ultima_data['TP_OPTIMISTA'] = (ultima_data['Close'] + (ultima_data['ATR'] * 3)).round(2)
+    
+    # 4. Ratio R/B Real (Calculado sobre el objetivo conservador)
+    # Si el ratio es bajo (menor a 1), el activo es "peligroso"
+    beneficio_esperado = ultima_data['TP_CONSERVADOR'] - ultima_data['Precio']
+    ultima_data['Ratio R/B'] = (beneficio_esperado / riesgo_pesos).round(2)
 
     # Filtro y Orden
-    # Usamos .sort_values para que el listado completo esté ordenado por confianza
     listado_completo = ultima_data[ultima_data['Volume'] > 10].sort_values('Confianza_%', ascending=False)
     
     listado_completo.to_excel(ruta_salida, index=False)
     return listado_completo
 
 # --- INTERFAZ STREAMLIT ---
-st.set_page_config(layout="wide") # Para que la tabla se vea bien a lo ancho
+st.set_page_config(layout="wide") 
 st.title("🚀 Panel de Control: Estrategia Golden")
 
 if st.button("🔄 ACTUALIZAR MERCADO Y GENERAR PREDICCIONES"):
     with st.status("Procesando datos...", expanded=True) as status:
-        st.write("Extraendo datos, entrenando IA y calculando ratios...")
+        st.write("Extraendo datos, entrenando IA y calculando ratios dinámicos...")
         extraer_todo_el_mercado()
         entrenar_modelo()
         generar_predicciones()
@@ -67,14 +76,15 @@ if st.button("🔄 ACTUALIZAR MERCADO Y GENERAR PREDICCIONES"):
 if os.path.exists(ruta_salida):
     df_mostrar = pd.read_excel(ruta_salida)
     
-    # Definimos las columnas y el orden exacto que pediste
+    # Orden de columnas actualizado para mostrar los dos TP
     columnas_finales = [
         'Ticker', 'Nombre', 'Sector', 'Precio', 'RSI', 
-        'ATR', 'STOP LOSS', 'TAKE PROFIT', 'Ratio R/B', 'Confianza_%'
+        'STOP LOSS', 'TP_CONSERVADOR', 'TP_OPTIMISTA', 'Ratio R/B', 'Confianza_%'
     ]
     
-    # Mostramos el listado completo
     st.subheader(f"📊 Listado Completo de Oportunidades ({len(df_mostrar)} activos)")
+    
+    # Mostramos la tabla
     st.dataframe(
         df_mostrar[columnas_finales],
         use_container_width=True,
