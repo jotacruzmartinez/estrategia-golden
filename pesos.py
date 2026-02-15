@@ -4,7 +4,7 @@ import pandas_ta as ta
 import os
 
 # CONFIGURACIÓN
-ruta_excel = r'C:\Users\PC\OneDrive\Escritorio\MAIN\IA_INVERSION_SEMANAL\HISTORIAL_DIARIO_COMPLETO.xlsx'
+ruta_excel = 'HISTORIAL_DIARIO_COMPLETO.xlsx'
 
 def extraer_todo_el_mercado():
     print("🚀 Iniciando extracción masiva de CEDEARs (Pesos Argentinos)...")
@@ -105,4 +105,5 @@ def extraer_todo_el_mercado():
         print("🔴 No se pudo extraer nada. Revisá la conexión.")
 
 if __name__ == "__main__":
+
     extraer_todo_el_mercado()
